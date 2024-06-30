@@ -1,0 +1,56 @@
+import java.io.IOException;  
+import java.net.URI;  
+import java.net.http.HttpClient;  
+import java.net.http.HttpRequest;  
+import java.net.http.HttpResponse;  
+import org.json.JSONObject;  
+  
+public class WeatherAPI {  
+    private static final String API_URL = "https://example.com/weather-api";  
+    private static final HttpClient client = HttpClient.newHttpClient();  
+  
+    public static WeatherData getWeather(String city) throws IOException, InterruptedException {  
+        HttpRequest request = HttpRequest.newBuilder()  
+               .uri(URI.create(API_URL + "?city=" + city))  
+               .GET()  
+               .build();  
+  
+        HttpResponse response = client.send(request, HttpResponse.BodyHandlers.ofString());  
+  
+        if (response.statusCode() == 200) {  
+            JSONObject jsonObject = new JSONObject(response.body());  
+            WeatherData weatherData = new WeatherData(  
+                    jsonObject.getString("city"),  
+                    jsonObject.getDouble("temperature"),  
+                    jsonObject.getString("condition")  
+            );  
+            return weatherData;  
+        } else {  
+            throw new RuntimeException("Failed to retrieve weather data");  
+        }  
+    }  
+  
+    public static class WeatherData {  
+        private String city;  
+        private double temperature;  
+        private String condition;  
+  
+        public WeatherData(String city, double temperature, String condition) {  
+            this.city = city;  
+            this.temperature = temperature;  
+            this.condition = condition;  
+        }  
+  
+        public String getCity() {  
+            return city;  
+        }  
+  
+        public double getTemperature() {  
+            return temperature;  
+        }  
+  
+        public String getCondition() {  
+            return condition;  
+        }  
+    }  
+}  
